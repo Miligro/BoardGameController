@@ -1,3 +1,18 @@
 <resources>
     <string name="app_name">BGC</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="main_screen_fragment">Ekran główny</string>
+    <string name="configuration_fragment">Konfiguracja</string>
+    <string name="synchronization_fragment">Synchronizacja</string>
+    <string name="history_fragment">Historia rankingu</string>
+    <string name="games_fragment">Lista gier</string>
+    <string name="add_ons_fragment">Lista dodatków</string>
+    <string name="username">Nazwa użytkownika:</string>
+    <string name="number_of_games">Liczba gier:</string>
+    <string name="number_of_add_ons">Liczba dodatków:</string>
+    <string name="last_sync_date">Data ostatniej synchronizacji:</string>
+    <string name="game_list">Lista gier</string>
+    <string name="add_ons_list">Lista dodatków</string>
+    <string name="synchronize">Synchronizuj</string>
+    <string name="clear_data">Wyczyść dane</string>
 </resources>

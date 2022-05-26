@@ -2,6 +2,61 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/nav_graph">
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/mainScreen">
 
+    <fragment
+        android:id="@+id/mainScreen"
+        android:name="com.example.bgc.MainScreen"
+        android:label="@string/main_screen_fragment"
+        tools:layout="@layout/fragment_main_screen" >
+        <action
+            android:id="@+id/action_mainScreen_to_synchronization"
+            app:destination="@id/synchronization" />
+        <action
+            android:id="@+id/action_mainScreen_to_gamesAddOns"
+            app:destination="@id/gamesAddOns" />
+        <action
+            android:id="@+id/action_mainScreen_to_configuration"
+            app:destination="@id/configuration" />
+    </fragment>
+    <fragment
+        android:id="@+id/synchronization"
+        android:name="com.example.bgc.Synchronization"
+        android:label="@string/synchronization_fragment"
+        tools:layout="@layout/fragment_synchronization" >
+        <action
+            android:id="@+id/action_synchronization_to_mainScreen"
+            app:destination="@id/mainScreen" />
+    </fragment>
+    <fragment
+        android:id="@+id/gamesAddOns"
+        android:name="com.example.bgc.GamesAddOns"
+        android:label="@string/games_fragment"
+        tools:layout="@layout/fragment_games_add_ons" >
+        <action
+            android:id="@+id/action_gamesAddOns_to_history"
+            app:destination="@id/history" />
+        <action
+            android:id="@+id/action_gamesAddOns_to_mainScreen"
+            app:destination="@id/mainScreen" />
+    </fragment>
+    <fragment
+        android:id="@+id/history"
+        android:name="com.example.bgc.History"
+        android:label="@string/history_fragment"
+        tools:layout="@layout/fragment_history" >
+        <action
+            android:id="@+id/action_history_to_gamesAddOns"
+            app:destination="@id/gamesAddOns" />
+    </fragment>
+    <fragment
+        android:id="@+id/configuration"
+        android:name="com.example.bgc.Configuration"
+        android:label="@string/configuration_fragment"
+        tools:layout="@layout/fragment_configuration" >
+        <action
+            android:id="@+id/action_configuration_to_mainScreen"
+            app:destination="@id/mainScreen" />
+    </fragment>
 </navigation>
