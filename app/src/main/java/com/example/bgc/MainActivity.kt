@@ -6,8 +6,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
-import android.view.Menu
-import android.view.MenuItem
+import androidx.lifecycle.ViewModelProvider
 import com.example.bgc.databinding.ActivityMainBinding
 
 
@@ -34,4 +33,11 @@ class MainActivity : AppCompatActivity() {
         return navController.navigateUp(appBarConfiguration)
                 || super.onSupportNavigateUp()
     }
+}
+
+class User(username: String, numberOfGames: Int, numberOfAddOns: Int, lastSync: String) {
+    var username: String? = username
+    var numberOfGames: Int? = numberOfGames
+    var numberOfAddOns: Int? = numberOfAddOns
+    var lastSync: String? = lastSync
 }
