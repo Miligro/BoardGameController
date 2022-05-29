@@ -8,6 +8,7 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.lifecycle.ViewModelProvider
 import com.example.bgc.databinding.ActivityMainBinding
+import java.io.File
 
 
 class MainActivity : AppCompatActivity() {
@@ -40,4 +41,11 @@ class User(username: String, numberOfGames: Int, numberOfAddOns: Int, lastSync: 
     var numberOfGames: Int? = numberOfGames
     var numberOfAddOns: Int? = numberOfAddOns
     var lastSync: String? = lastSync
+}
+
+class Game(title: String?, img: String?, releaseYear: Int?, ranking: Int?){
+    var title:String? = title
+    var img:String? = img
+    var releaseYear:Int? = releaseYear
+    var ranking:Int? = ranking
 }

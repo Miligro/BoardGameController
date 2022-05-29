@@ -5,6 +5,8 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import androidx.lifecycle.ViewModel
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 class MyDBHandler(context: Context, name: String?, factory: SQLiteDatabase.CursorFactory?, version: Int)
     : SQLiteOpenHelper(context, DATABASE_NAME, factory, DATABASE_VERSION){
@@ -32,6 +34,11 @@ class MyDBHandler(context: Context, name: String?, factory: SQLiteDatabase.Curso
         onCreate(db)
     }
 
+    fun deleteAll(){
+        val db = this.writableDatabase
+        db.execSQL("DELETE FROM $TABLE_USER")
+    }
+
     fun addUser(user: User){
         val values = ContentValues()
         values.put(COLUMN_USERNAME, user.username)
@@ -41,6 +48,16 @@ class MyDBHandler(context: Context, name: String?, factory: SQLiteDatabase.Curso
         val db = this.writableDatabase
         db.insert(TABLE_USER, null, values)
         db.close()
+    }
+
+    fun syncUser(user: User){
+        val values = ContentValues()
+        values.put(COLUMN_USERNAME, user.username)
+        values.put(COLUMN_GAMESNUM, user.numberOfGames)
+        values.put(COLUMN_ADDONSNUM, user.numberOfAddOns)
+        values.put(COLUMN_LASTSYNC, LocalDateTime.now().toString())
+        val db = this.writableDatabase
+        db.update(TABLE_USER, values, "_id = 1", null);
     }
 
     fun findUser():User? {
