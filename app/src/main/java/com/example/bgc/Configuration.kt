@@ -48,6 +48,7 @@ class Configuration : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         dbHandler = MyDBHandler(requireActivity(), null, null, 1)
+        dbHandler.deleteAllGamesAddOns()
         binding.progressBar.progress = 0
         binding.saveUserBtn.setOnClickListener{
             username = binding.usernameText.text.toString()
@@ -73,7 +74,9 @@ class Configuration : Fragment() {
 
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
-            loadData()
+            loadDataGame()
+            loadDataAddOn()
+            findNavController().navigate(R.id.action_configuration_to_mainScreen)
         }
 
         override fun onProgressUpdate(vararg values: Int?) {
@@ -83,31 +86,51 @@ class Configuration : Fragment() {
 
         override fun doInBackground(vararg p0: String?): String {
             try{
-                val url = URL("https://boardgamegeek.com/xmlapi2/collection?username=$username&stats=1")
-                val connection = url.openConnection()
-                connection.connect()
-                val lengthOfFile = connection.contentLength
-                val isStream = url.openStream()
+                val urlGames = URL("https://boardgamegeek.com/xmlapi2/collection?username=$username&stats=1&subtype=boardgame")
+                val connectionGames = urlGames.openConnection()
+                connectionGames.connect()
+                val isStreamGames = urlGames.openStream()
+
+                val urlAddOns = URL("https://boardgamegeek.com/xmlapi2/collection?username=$username&stats=1&subtype=boardgameexpansion")
+                val connectionAddOns = urlAddOns.openConnection()
+                connectionAddOns.connect()
+                val isStreamAddOns = urlAddOns.openStream()
+
+//                val lengthOfFile = connectionGames.contentLengthLong
                 val path = context?.filesDir
                 val testDirectory = File("$path/XML")
                 if (!testDirectory.exists()) testDirectory.mkdir()
-                val fos = FileOutputStream("$testDirectory/user.xml")
+
+                val fosGames = FileOutputStream("$testDirectory/games.xml")
+                val fosAddOns = FileOutputStream("$testDirectory/addons.xml")
+
                 val data = ByteArray(1024)
                 var count = 0
                 var total:Int = 0
                 var progress= 0
-                count = isStream.read(data)
 
+                count = isStreamGames.read(data)
                 while(count != -1){
                     total += count
-//                    progress = total*100 / lengthOfFile
                     progress = total*100 / 3851857
                     publishProgress(progress)
-                    fos.write(data, 0, count)
-                    count = isStream.read(data)
+                    fosGames.write(data, 0, count)
+                    count = isStreamGames.read(data)
                 }
-                isStream.close()
-                fos.close()
+                isStreamGames.close()
+                fosGames.close()
+
+                count = isStreamAddOns.read(data)
+                while(count != -1){
+                    total += count
+                    progress = total*100 / 3851857
+                    publishProgress(progress)
+                    fosAddOns.write(data, 0, count)
+                    count = isStreamAddOns.read(data)
+                }
+                isStreamAddOns.close()
+                fosAddOns.close()
+
             }catch(e: MalformedURLException){
                 return "Zły URL"
             } catch (e: FileNotFoundException){
@@ -124,11 +147,11 @@ class Configuration : Fragment() {
         cd.execute()
     }
 
-    fun loadData(){
+    fun loadDataGame(){
         gamesList = mutableListOf()
         addOnsList = mutableListOf()
 
-        val filename = "user.xml"
+        val filename = "games.xml"
         val path = context?.filesDir
         val inDir = File(path, "XML")
 
@@ -140,18 +163,22 @@ class Configuration : Fragment() {
                 xmlDoc.documentElement.normalize()
 
                 val items: NodeList = xmlDoc.getElementsByTagName("item")
-
                 for (i in 0 until items.length){
                     val itemNode: Node = items.item(i)
                     if(itemNode.nodeType == Node.ELEMENT_NODE) {
                         val elem = itemNode as Element
                         val children = elem.childNodes
 //                        binding.progressBar.progress = (i+1)*100/items.length
+                        var currentId:Long? = null
                         var currentTitle:String? = null
                         var currentImg:String? = null
                         var currentReleaseYear:Int? = null
                         var currentRanking:Int? = null
 
+                        if (elem.attributes != null){
+                            currentId = elem.attributes.getNamedItem("objectid").nodeValue.toLong()
+
+                        }
                         for (j in 0 until children.length){
                             val node = children.item(j)
                             if (node is Element){
@@ -159,7 +186,7 @@ class Configuration : Fragment() {
                                     "name" -> {
                                         currentTitle = node.textContent
                                     }
-                                    "image" -> {
+                                    "thumbnail" -> {
                                         currentImg = node.textContent
                                     }
                                     "yearpublished" -> {
@@ -180,9 +207,12 @@ class Configuration : Fragment() {
                                                             if (nodeV4.attributes != null){
                                                                 if (nodeV4.attributes.getNamedItem("name").nodeValue == "boardgame" && nodeV4.attributes.getNamedItem("type").nodeValue == "subtype"){
                                                                     val curR: String = nodeV4.attributes.getNamedItem("value").nodeValue
-                                                                    if (curR == "Not Ranked"){
-                                                                        currentRanking = 0
-                                                                    }else{
+//                                                                    if (curR == "Not Ranked"){
+//                                                                        currentRanking = 0
+//                                                                    }else{
+//                                                                        currentRanking = curR.toInt()
+//                                                                    }
+                                                                    if (curR != "Not Ranked"){
                                                                         currentRanking = curR.toInt()
                                                                     }
                                                                 }
@@ -196,25 +226,87 @@ class Configuration : Fragment() {
                                 }
                             }
                         }
+                        if (currentId == null) currentId = -1
                         if (currentTitle == null) currentTitle = "No title"
                         if (currentImg == null) currentImg = "https://www.freeiconspng.com/uploads/no-image-icon-6.png"
-                        if (currentRanking == null) currentRanking = 0
-                        if (currentReleaseYear == null) currentReleaseYear = -1
+                        if (currentRanking == null) continue
+                        if (currentReleaseYear == null) currentReleaseYear = 0
 
-                        val game=Game(currentTitle, currentImg, currentReleaseYear, currentRanking)
-                        gamesList!!.add(game)
+                        val game=Game(currentId, currentTitle, currentImg, currentReleaseYear, currentRanking)
+                        dbHandler.addGame(game)
                     }
                 }
             }
         }
         val user: User? = dbHandler.findUser()
-        user?.numberOfGames = gamesList!!.size
-//        user?.numberOfAddOns = addOnsList!!.size
-        user?.numberOfAddOns = progres_temp
+        user?.numberOfGames = dbHandler.getNumGames()
         if (user != null) {
             dbHandler.syncUser(user)
         }
-        findNavController().navigate(R.id.action_configuration_to_mainScreen)
     }
 
+    fun loadDataAddOn(){
+        gamesList = mutableListOf()
+        addOnsList = mutableListOf()
+
+        val filename = "addons.xml"
+        val path = context?.filesDir
+        val inDir = File(path, "XML")
+
+        if (inDir.exists()) {
+            val file = File(inDir, filename)
+            if (file.exists()) {
+                val xmlDoc: Document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file)
+
+                xmlDoc.documentElement.normalize()
+
+                val items: NodeList = xmlDoc.getElementsByTagName("item")
+                for (i in 0 until items.length){
+                    val itemNode: Node = items.item(i)
+                    if(itemNode.nodeType == Node.ELEMENT_NODE) {
+                        val elem = itemNode as Element
+                        val children = elem.childNodes
+//                        binding.progressBar.progress = (i+1)*100/items.length
+                        var currentId:Long? = null
+                        var currentTitle:String? = null
+                        var currentImg:String? = null
+                        var currentReleaseYear:Int? = null
+
+                        if (elem.attributes != null){
+                            currentId = elem.attributes.getNamedItem("objectid").nodeValue.toLong()
+
+                        }
+                        for (j in 0 until children.length){
+                            val node = children.item(j)
+                            if (node is Element){
+                                when(node.nodeName){
+                                    "name" -> {
+                                        currentTitle = node.textContent
+                                    }
+                                    "thumbnail" -> {
+                                        currentImg = node.textContent
+                                    }
+                                    "yearpublished" -> {
+                                        currentReleaseYear = node.textContent.toInt()
+                                    }
+                                }
+                            }
+                        }
+                        if (currentId == null) currentId = -1
+                        if (currentTitle == null) currentTitle = "No title"
+                        if (currentImg == null) currentImg = "https://www.freeiconspng.com/uploads/no-image-icon-6.png"
+                        if (currentReleaseYear == null) currentReleaseYear = 0
+
+                        val addOn=AddOn(currentId, currentTitle, currentImg, currentReleaseYear)
+                        dbHandler.addAddOn(addOn)
+                    }
+                }
+            }
+        }
+        val user: User? = dbHandler.findUser()
+        user?.numberOfAddOns = dbHandler.getNumAddOns()
+        if (user != null) {
+            dbHandler.syncUser(user)
+        }
+    }
 }

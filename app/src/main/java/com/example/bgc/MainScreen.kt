@@ -78,7 +78,7 @@ class MainScreen : Fragment() {
         builder.setMessage("Czy na pewno chcesz wyczyścić dane?")
         builder.setPositiveButton("Zatwierdz",
             DialogInterface.OnClickListener { dialog, which ->
-                dbHandler.deleteAll()
+                dbHandler.deleteAllUsers()
                 activity?.finish()
                 exitProcess(0)
             })

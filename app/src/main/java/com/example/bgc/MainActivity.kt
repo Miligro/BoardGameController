@@ -43,9 +43,6 @@ class User(username: String, numberOfGames: Int, numberOfAddOns: Int, lastSync: 
     var lastSync: String? = lastSync
 }
 
-class Game(title: String?, img: String?, releaseYear: Int?, ranking: Int?){
-    var title:String? = title
-    var img:String? = img
-    var releaseYear:Int? = releaseYear
-    var ranking:Int? = ranking
-}
+class Game(val id: Long?, val title: String?, val img: String?, val releaseYear: Int?, val ranking: Int?){}
+
+class AddOn(val id: Long?, val title: String?, val img: String?, val releaseYear: Int?)
