@@ -43,6 +43,28 @@ class User(username: String, numberOfGames: Int, numberOfAddOns: Int, lastSync: 
     var lastSync: String? = lastSync
 }
 
-class Game(val id: Long?, val title: String?, val img: String?, val releaseYear: Int?, val ranking: Int?){}
+class GameAddOn{
+    var id: Long = 0
+    var title: String = ""
+    var img: String = ""
+    var releaseYear: Int = 0
+    var ranking: Int? = null
+    var type: String = ""
 
-class AddOn(val id: Long?, val title: String?, val img: String?, val releaseYear: Int?)
+    constructor(id: Long, title: String, img: String, releaseYear: Int, ranking: Int){
+        this.id = id
+        this.title = title
+        this.img = img
+        this.releaseYear = releaseYear
+        this.ranking = ranking
+        this.type = "Game"
+    }
+
+    constructor(id: Long, title: String, img: String, releaseYear: Int){
+        this.id = id
+        this.title = title
+        this.img = img
+        this.releaseYear = releaseYear
+        this.type = "Expansion"
+    }
+}

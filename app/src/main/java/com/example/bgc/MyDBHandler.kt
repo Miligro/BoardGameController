@@ -22,13 +22,12 @@ class MyDBHandler(context: Context, name: String?, factory: SQLiteDatabase.Curso
         val COLUMN_ADDONSNUM = "addonsnum"
         val COLUMN_LASTSYNC = "lastsync"
 
-        val TABLE_GAME = "game"
+        val TABLE_GAMEADDON = "gameaddon"
         val COLUMN_TITLE = "title"
         val COLUMN_IMAGE = "image"
         val COLUMN_RELEASEYEAR = "releaseyear"
         val COLUMN_RANKING = "ranking"
-
-        val TABLE_ADDON = "addon"
+        val COLUMN_TYPE = "type"
     }
 
     override fun onCreate(db: SQLiteDatabase) {
@@ -36,22 +35,17 @@ class MyDBHandler(context: Context, name: String?, factory: SQLiteDatabase.Curso
                 COLUMN_USERNAME + " TEXT," + COLUMN_GAMESNUM + " INTEGER," + COLUMN_ADDONSNUM + " INTEGER," +
                 COLUMN_LASTSYNC + " TEXT)")
 
-        val CREATE_GAME_TABLE = ("CREATE TABLE " + TABLE_GAME + "(" + COLUMN_ID + " INTEGER PRIMARY KEY," +
+        val CREATE_GAME_ADDON_TABLE = ("CREATE TABLE " + TABLE_GAMEADDON + "(" + COLUMN_ID + " INTEGER PRIMARY KEY," +
                 COLUMN_TITLE + " TEXT," + COLUMN_IMAGE + " TEXT," + COLUMN_RELEASEYEAR + " INTEGER," +
-                COLUMN_RANKING + " INTEGER)")
+                COLUMN_RANKING + " INTEGER," + COLUMN_TYPE + " TEXT)")
 
-        val CREATE_ADDON_TABLE = ("CREATE TABLE " + TABLE_ADDON + "(" + COLUMN_ID + " INTEGER PRIMARY KEY," +
-                COLUMN_TITLE + " TEXT," + COLUMN_IMAGE + " TEXT," + COLUMN_RELEASEYEAR + " INTEGER)")
-
-        db.execSQL(CREATE_GAME_TABLE)
+        db.execSQL(CREATE_GAME_ADDON_TABLE)
         db.execSQL(CREATE_USERNAME_TABLE)
-        db.execSQL(CREATE_ADDON_TABLE)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, p1: Int, p2: Int) {
         db.execSQL("DROP TABLE IF EXISTS $TABLE_USER")
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_GAME")
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_ADDON")
+        db.execSQL("DROP TABLE IF EXISTS $TABLE_GAMEADDON")
         onCreate(db)
     }
 
@@ -60,10 +54,10 @@ class MyDBHandler(context: Context, name: String?, factory: SQLiteDatabase.Curso
         db.execSQL("DELETE FROM $TABLE_USER")
     }
 
-    fun addGame(game: Game){
+    fun addGame(game: GameAddOn){
         val gameId = game.id
         val db = this.writableDatabase
-        val query = "SELECT * FROM $TABLE_GAME WHERE $COLUMN_ID = $gameId"
+        val query = "SELECT * FROM $TABLE_GAMEADDON WHERE $COLUMN_ID = $gameId"
         val cursor = db.rawQuery(query, null)
         if (cursor.count==0){
             val values = ContentValues()
@@ -72,26 +66,37 @@ class MyDBHandler(context: Context, name: String?, factory: SQLiteDatabase.Curso
             values.put(COLUMN_IMAGE, game.img)
             values.put(COLUMN_RELEASEYEAR, game.releaseYear)
             values.put(COLUMN_RANKING, game.ranking)
-            db.insert(TABLE_GAME, null, values)
+            values.put(COLUMN_TYPE, game.type)
+            db.insert(TABLE_GAMEADDON, null, values)
         }
         cursor.close()
         db.close()
     }
 
-    fun addAddOn(addOn: AddOn){
-        val addOnId = addOn.id
+    fun addAddOn(addOn: GameAddOn){
+        val id = addOn.id
+        val query = "SELECT * FROM $TABLE_GAMEADDON WHERE $COLUMN_ID = $id"
         val db = this.writableDatabase
-        val query = "SELECT * $TABLE_ADDON WHERE $COLUMN_ID = $addOnId"
         val cursor = db.rawQuery(query, null)
 
-        if (cursor.count==0) {
+        if (cursor.moveToFirst()){
             val values = ContentValues()
             values.put(COLUMN_ID, addOn.id)
             values.put(COLUMN_TITLE, addOn.title)
             values.put(COLUMN_IMAGE, addOn.img)
             values.put(COLUMN_RELEASEYEAR, addOn.releaseYear)
-            db.insert(TABLE_ADDON, null, values)
+            values.put(COLUMN_TYPE, "Expansion")
+            db.update(TABLE_GAMEADDON, values, "_id = $id", null);
+        } else{
+            val values = ContentValues()
+            values.put(COLUMN_ID, addOn.id)
+            values.put(COLUMN_TITLE, addOn.title)
+            values.put(COLUMN_IMAGE, addOn.img)
+            values.put(COLUMN_RELEASEYEAR, addOn.releaseYear)
+            values.put(COLUMN_TYPE, "Expansion")
+            db.insert(TABLE_GAMEADDON, null, values)
         }
+
         cursor.close()
         db.close()
     }
@@ -110,14 +115,13 @@ class MyDBHandler(context: Context, name: String?, factory: SQLiteDatabase.Curso
     fun deleteAllGamesAddOns(){
         val db = this.writableDatabase
         try{
-            db.execSQL("DELETE FROM $TABLE_GAME")
-            db.execSQL("DELETE FROM $TABLE_ADDON")
+            db.execSQL("DELETE FROM $TABLE_GAMEADDON")
         }catch (e: Exception){}
     }
 
-    fun getGames():ArrayList<Game>{
-        val gamesList: ArrayList<Game> = ArrayList()
-        val query = "SELECT * FROM $TABLE_GAME"
+    fun getGames():ArrayList<GameAddOn>{
+        val gamesList: ArrayList<GameAddOn> = ArrayList()
+        val query = "SELECT * FROM $TABLE_GAMEADDON WHERE $COLUMN_TYPE = \"Game\""
 
         val db = this.readableDatabase
         var cursor: Cursor? = null
@@ -142,16 +146,16 @@ class MyDBHandler(context: Context, name: String?, factory: SQLiteDatabase.Curso
                 releaseYear = cursor.getInt(3)
                 ranking = cursor.getInt(4)
 
-                val game = Game(id = id, title = title, img = image, releaseYear = releaseYear, ranking = ranking)
+                val game = GameAddOn(id = id, title = title, img = image, releaseYear = releaseYear, ranking = ranking)
                 gamesList.add(game)
             } while(cursor.moveToNext())
         }
         return gamesList
     }
 
-    fun getAddOns():ArrayList<AddOn>{
-        val addOnsList: ArrayList<AddOn> = ArrayList()
-        val query = "SELECT * FROM $TABLE_GAME"
+    fun getAddOns():ArrayList<GameAddOn>{
+        val addOnsList: ArrayList<GameAddOn> = ArrayList()
+        val query = "SELECT * FROM $TABLE_GAMEADDON WHERE $COLUMN_TYPE = \"Expansion\""
 
         val db = this.readableDatabase
         var cursor: Cursor? = null
@@ -174,7 +178,7 @@ class MyDBHandler(context: Context, name: String?, factory: SQLiteDatabase.Curso
                 image = cursor.getString(2)
                 releaseYear = cursor.getInt(3)
 
-                val addOn = AddOn(id = id, title = title, img = image, releaseYear = releaseYear)
+                val addOn = GameAddOn(id = id, title = title, img = image, releaseYear = releaseYear)
                 addOnsList.add(addOn)
             } while(cursor.moveToNext())
         }
@@ -203,14 +207,14 @@ class MyDBHandler(context: Context, name: String?, factory: SQLiteDatabase.Curso
             val num_of_add_ons = Integer.parseInt(cursor.getString(3))
             val last_sync = cursor.getString(4)
             user = User(username, num_of_games, num_of_add_ons, last_sync)
-            cursor.close()
         }
+        cursor.close()
         db.close()
         return user
     }
 
     fun getNumGames(): Int {
-        val query = "SELECT * FROM $TABLE_GAME"
+        val query = "SELECT * FROM $TABLE_GAMEADDON WHERE $COLUMN_TYPE = \"Game\""
         val db = this.writableDatabase
         val cursor = db.rawQuery(query, null)
         val count = cursor.count
@@ -220,7 +224,7 @@ class MyDBHandler(context: Context, name: String?, factory: SQLiteDatabase.Curso
     }
 
     fun getNumAddOns(): Int {
-        val query = "SELECT * FROM $TABLE_ADDON"
+        val query = "SELECT * FROM $TABLE_GAMEADDON WHERE $COLUMN_TYPE = \"Expansion\""
         val db = this.writableDatabase
         val cursor = db.rawQuery(query, null)
         val count = cursor.count

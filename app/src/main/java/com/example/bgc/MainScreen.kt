@@ -46,7 +46,7 @@ class MainScreen : Fragment() {
             setUserData()
         }
         binding.gamesBtn.setOnClickListener {
-            findNavController().navigate(R.id.action_mainScreen_to_gamesAddOns)
+            findNavController().navigate(R.id.action_mainScreen_to_games)
         }
         binding.AddOnsBtn.setOnClickListener {
             findNavController().navigate(R.id.action_mainScreen_to_configuration)

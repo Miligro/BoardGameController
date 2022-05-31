@@ -28,9 +28,6 @@ class Configuration : Fragment() {
     private var _binding: FragmentConfigurationBinding? = null
     private lateinit var dbHandler: MyDBHandler
 
-    var gamesList: MutableList<Game>? = null
-    var addOnsList: MutableList<Game>? = null
-    var progres_temp: Int = -1
     private var username: String = ""
     private val binding get() = _binding!!
 
@@ -76,6 +73,12 @@ class Configuration : Fragment() {
             super.onPostExecute(result)
             loadDataGame()
             loadDataAddOn()
+            val user: User? = dbHandler.findUser()
+            user?.numberOfAddOns = dbHandler.getNumAddOns()
+            user?.numberOfGames = dbHandler.getNumGames()
+            if (user != null) {
+                dbHandler.syncUser(user)
+            }
             findNavController().navigate(R.id.action_configuration_to_mainScreen)
         }
 
@@ -148,9 +151,6 @@ class Configuration : Fragment() {
     }
 
     fun loadDataGame(){
-        gamesList = mutableListOf()
-        addOnsList = mutableListOf()
-
         val filename = "games.xml"
         val path = context?.filesDir
         val inDir = File(path, "XML")
@@ -207,12 +207,9 @@ class Configuration : Fragment() {
                                                             if (nodeV4.attributes != null){
                                                                 if (nodeV4.attributes.getNamedItem("name").nodeValue == "boardgame" && nodeV4.attributes.getNamedItem("type").nodeValue == "subtype"){
                                                                     val curR: String = nodeV4.attributes.getNamedItem("value").nodeValue
-//                                                                    if (curR == "Not Ranked"){
-//                                                                        currentRanking = 0
-//                                                                    }else{
-//                                                                        currentRanking = curR.toInt()
-//                                                                    }
-                                                                    if (curR != "Not Ranked"){
+                                                                    if (curR == "Not Ranked"){
+                                                                        currentRanking = 0
+                                                                    }else{
                                                                         currentRanking = curR.toInt()
                                                                     }
                                                                 }
@@ -229,26 +226,18 @@ class Configuration : Fragment() {
                         if (currentId == null) currentId = -1
                         if (currentTitle == null) currentTitle = "No title"
                         if (currentImg == null) currentImg = "https://www.freeiconspng.com/uploads/no-image-icon-6.png"
-                        if (currentRanking == null) continue
-                        if (currentReleaseYear == null) currentReleaseYear = 0
+                        if (currentRanking == null) currentRanking = -1
+                        if (currentReleaseYear == null) currentReleaseYear = -1
 
-                        val game=Game(currentId, currentTitle, currentImg, currentReleaseYear, currentRanking)
+                        val game=GameAddOn(currentId, currentTitle, currentImg, currentReleaseYear, currentRanking)
                         dbHandler.addGame(game)
                     }
                 }
             }
         }
-        val user: User? = dbHandler.findUser()
-        user?.numberOfGames = dbHandler.getNumGames()
-        if (user != null) {
-            dbHandler.syncUser(user)
-        }
     }
 
     fun loadDataAddOn(){
-        gamesList = mutableListOf()
-        addOnsList = mutableListOf()
-
         val filename = "addons.xml"
         val path = context?.filesDir
         val inDir = File(path, "XML")
@@ -295,18 +284,13 @@ class Configuration : Fragment() {
                         if (currentId == null) currentId = -1
                         if (currentTitle == null) currentTitle = "No title"
                         if (currentImg == null) currentImg = "https://www.freeiconspng.com/uploads/no-image-icon-6.png"
-                        if (currentReleaseYear == null) currentReleaseYear = 0
+                        if (currentReleaseYear == null) currentReleaseYear = -1
 
-                        val addOn=AddOn(currentId, currentTitle, currentImg, currentReleaseYear)
+                        val addOn=GameAddOn(currentId, currentTitle, currentImg, currentReleaseYear)
                         dbHandler.addAddOn(addOn)
                     }
                 }
             }
-        }
-        val user: User? = dbHandler.findUser()
-        user?.numberOfAddOns = dbHandler.getNumAddOns()
-        if (user != null) {
-            dbHandler.syncUser(user)
         }
     }
 }

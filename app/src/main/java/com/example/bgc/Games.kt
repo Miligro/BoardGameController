@@ -6,10 +6,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import com.example.bgc.databinding.FragmentGamesAddOnsBinding
+import com.example.bgc.databinding.FragmentGamesBinding
 
-class GamesAddOns : Fragment() {
-    private var _binding: FragmentGamesAddOnsBinding? = null
+class Games : Fragment() {
+    private var _binding: FragmentGamesBinding? = null
     private lateinit var dbHandler: MyDBHandler
     private val binding get() = _binding!!
 
@@ -18,14 +18,14 @@ class GamesAddOns : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
 
-        _binding = FragmentGamesAddOnsBinding.inflate(inflater, container, false)
+        _binding = FragmentGamesBinding.inflate(inflater, container, false)
         return binding.root
 
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         dbHandler = MyDBHandler(requireActivity(), null, null, 1)
-        val gameListArray: ArrayList<Game> = dbHandler.getGames()
+        val gameListArray: ArrayList<GameAddOn> = dbHandler.getGames()
         val sizeGames = gameListArray.size
         Toast.makeText(activity, "Ilość gier: $sizeGames", Toast.LENGTH_LONG).show()
         super.onViewCreated(view, savedInstanceState)
