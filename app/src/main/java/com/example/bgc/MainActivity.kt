@@ -43,6 +43,8 @@ class User(username: String, numberOfGames: Int, numberOfAddOns: Int, lastSync: 
     var lastSync: String? = lastSync
 }
 
+class GameRankingHistory(var id: Long, var syncDate: String, var ranking: Int) {}
+
 class GameAddOn{
     var id: Long = 0
     var title: String = ""

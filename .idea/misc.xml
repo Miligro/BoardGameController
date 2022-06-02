@@ -4,6 +4,8 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/Users/milo2/Desktop/Studia/Sem VI/UBI/BoardGameController/app/src/main/res/layout/custom_row.xml" value="0.75" />
+        <entry key="..\:/Users/milo2/Desktop/Studia/Sem VI/UBI/BoardGameController/app/src/main/res/layout/custom_row_add_on.xml" value="0.25677083333333334" />
+        <entry key="..\:/Users/milo2/Desktop/Studia/Sem VI/UBI/BoardGameController/app/src/main/res/layout/custom_row_history.xml" value="0.5" />
         <entry key="..\:/Users/milo2/Desktop/Studia/Sem VI/UBI/BoardGameController/app/src/main/res/layout/fragment_add_ons.xml" value="0.23958333333333334" />
         <entry key="..\:/Users/milo2/Desktop/Studia/Sem VI/UBI/BoardGameController/app/src/main/res/layout/fragment_games.xml" value="0.3561430793157076" />
         <entry key="..\:/Users/milo2/Desktop/Studia/Sem VI/UBI/BoardGameController/app/src/main/res/layout/fragment_games_add_ons.xml" value="0.23958333333333334" />

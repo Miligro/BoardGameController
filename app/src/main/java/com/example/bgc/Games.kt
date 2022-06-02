@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.bgc.databinding.FragmentGamesBinding
@@ -27,7 +28,7 @@ class Games : Fragment() {
         _binding = FragmentGamesBinding.inflate(inflater, container, false)
 
         recyclerView = binding.recyclerView;
-        adapter = GamesListAdapter()
+        adapter = GamesListAdapter(findNavController())
 
         val llm = LinearLayoutManager(activity)
         llm.orientation = LinearLayoutManager.VERTICAL
@@ -40,17 +41,17 @@ class Games : Fragment() {
     @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         dbHandler = MyDBHandler(requireActivity(), null, null, 1)
-        val gameListArray: ArrayList<GameAddOn> = dbHandler.getGames(null, null)
+        val gameListArray: ArrayList<GameAddOn> = dbHandler.getGames()
         adapter.setData(gameListArray)
 
         binding.titleSort.setOnClickListener {
             if (binding.titleSort.text == getString(R.string.title_desc)){
-                val gameListAr: ArrayList<GameAddOn> = dbHandler.getGames("title", "ASC")
-                adapter.setData(gameListAr)
+                gameListArray.sortBy { it.title }
+                adapter.setData(gameListArray)
                 binding.titleSort.text = getString(R.string.title_asc)
             }else if(binding.titleSort.text == getString(R.string.title_asc) || binding.titleSort.text == getString(R.string.title)){
-                val gameListAr: ArrayList<GameAddOn> = dbHandler.getGames("title", "DESC")
-                adapter.setData(gameListAr)
+                gameListArray.sortByDescending { it.title }
+                adapter.setData(gameListArray)
                 binding.titleSort.text = getString(R.string.title_desc)
             }
             binding.releaseSort.text = getString(R.string.release)
@@ -58,12 +59,12 @@ class Games : Fragment() {
         }
         binding.releaseSort.setOnClickListener {
             if (binding.releaseSort.text == getString(R.string.release_desc)){
-                val gameListAr: ArrayList<GameAddOn> = dbHandler.getGames("releaseyear", "ASC")
-                adapter.setData(gameListAr)
+                gameListArray.sortBy { it.releaseYear }
+                adapter.setData(gameListArray)
                 binding.releaseSort.text = getString(R.string.release_asc)
             }else if(binding.releaseSort.text == getString(R.string.release_asc) || binding.releaseSort.text == getString(R.string.release)){
-                val gameListAr: ArrayList<GameAddOn> = dbHandler.getGames("releaseyear", "DESC")
-                adapter.setData(gameListAr)
+                gameListArray.sortByDescending { it.releaseYear }
+                adapter.setData(gameListArray)
                 binding.releaseSort.text = getString(R.string.release_desc)
             }
             binding.titleSort.text = getString(R.string.title)
@@ -71,12 +72,12 @@ class Games : Fragment() {
         }
         binding.rankingSort.setOnClickListener {
             if (binding.rankingSort.text == getString(R.string.ranking_desc)){
-                val gameListAr: ArrayList<GameAddOn> = dbHandler.getGames("ranking", "ASC")
-                adapter.setData(gameListAr)
+                gameListArray.sortBy { it.ranking }
+                adapter.setData(gameListArray)
                 binding.rankingSort.text = getString(R.string.ranking_asc)
             }else if(binding.rankingSort.text == getString(R.string.ranking_asc) || binding.rankingSort.text == getString(R.string.ranking)){
-                val gameListAr: ArrayList<GameAddOn> = dbHandler.getGames("ranking", "DESC")
-                adapter.setData(gameListAr)
+                gameListArray.sortByDescending { it.ranking }
+                adapter.setData(gameListArray)
                 binding.rankingSort.text = getString(R.string.ranking_desc)
             }
             binding.titleSort.text = getString(R.string.title)

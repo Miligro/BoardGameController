@@ -30,4 +30,5 @@
     <string name="loadingAddOns">Wczytywanie dodatków</string>
     <string name="enter_username">Podaj nazwę użytkownika</string>
     <string name="save">Zapisz</string>
+    <string name="sync_date">Data synchronizacji</string>
 </resources>

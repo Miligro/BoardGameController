@@ -5,20 +5,23 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.navigation.NavController
 import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
 
-class GamesListAdapter: RecyclerView.Adapter<GamesListAdapter.MyViewHolder>() {
+class GamesListAdapter(navController: NavController): RecyclerView.Adapter<GamesListAdapter.MyViewHolder>() {
 
     private var gamesList = emptyList<GameAddOn>()
-
+    private var navCon = navController
     class MyViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){
         val lpText: TextView = itemView.findViewById(R.id.lpText)
         val titleText: TextView = itemView.findViewById(R.id.titleText)
         val releaseYearText: TextView = itemView.findViewById(R.id.releaseText)
         val rankingText: TextView = itemView.findViewById(R.id.rankingText)
         val imageView: ImageView = itemView.findViewById(R.id.imageView)
+        val rowLayout: LinearLayout = itemView.findViewById(R.id.rowLayout)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
@@ -33,6 +36,9 @@ class GamesListAdapter: RecyclerView.Adapter<GamesListAdapter.MyViewHolder>() {
         holder.releaseYearText.text = currentItem.releaseYear.toString()
         holder.rankingText.text = currentItem.ranking.toString()
         Picasso.get().load(currentItem.img).into(holder.imageView);
+        holder.rowLayout.setOnClickListener{
+            navCon.navigate(R.id.action_games_to_history)
+        }
     }
 
     override fun getItemCount(): Int {

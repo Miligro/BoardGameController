@@ -38,32 +38,32 @@ class AddOns : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         dbHandler = MyDBHandler(requireActivity(), null, null, 1)
-        val addOnsListArray: ArrayList<GameAddOn> = dbHandler.getAddOns(null, null)
+        val addOnsListArray: ArrayList<GameAddOn> = dbHandler.getAddOns()
         adapter.setData(addOnsListArray)
 
         binding.titleSort.setOnClickListener {
             if (binding.titleSort.text == getString(R.string.title_desc)){
-                val gameListAr: ArrayList<GameAddOn> = dbHandler.getAddOns("title", "ASC")
-                adapter.setData(gameListAr)
+                addOnsListArray.sortBy{it.title}
+                adapter.setData(addOnsListArray)
                 binding.titleSort.text = getString(R.string.title_asc)
             }else if(binding.titleSort.text == getString(R.string.title_asc) || binding.titleSort.text == getString(R.string.title)){
-                val gameListAr: ArrayList<GameAddOn> = dbHandler.getAddOns("title", "DESC")
-                adapter.setData(gameListAr)
+                addOnsListArray.sortByDescending{it.title}
+                adapter.setData(addOnsListArray)
                 binding.titleSort.text = getString(R.string.title_desc)
             }
             binding.releaseSort.text = getString(R.string.release)
         }
         binding.releaseSort.setOnClickListener {
             if (binding.releaseSort.text == getString(R.string.release_desc)) {
-                val gameListAr: ArrayList<GameAddOn> = dbHandler.getAddOns("releaseyear", "ASC")
-                adapter.setData(gameListAr)
+                addOnsListArray.sortBy{it.releaseYear}
+                adapter.setData(addOnsListArray)
                 binding.releaseSort.text = getString(R.string.release_asc)
             } else if (binding.releaseSort.text == getString(R.string.release_asc) || binding.releaseSort.text == getString(
                     R.string.release
                 )
             ) {
-                val gameListAr: ArrayList<GameAddOn> = dbHandler.getAddOns("releaseyear", "DESC")
-                adapter.setData(gameListAr)
+                addOnsListArray.sortByDescending{it.releaseYear}
+                adapter.setData(addOnsListArray)
                 binding.releaseSort.text = getString(R.string.release_desc)
             }
             binding.titleSort.text = getString(R.string.title)

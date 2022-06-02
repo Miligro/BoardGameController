@@ -32,7 +32,7 @@ class Configuration : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         dbHandler = MyDBHandler(requireActivity(), null, null, 1)
-        dbHandler.deleteAllGamesAddOns()
+//        dbHandler.deleteAllGamesAddOns()
         binding.saveUserBtn.setOnClickListener{
             binding.saveUserBtn.isEnabled = false
             username = binding.usernameText.text.toString()

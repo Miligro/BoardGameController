@@ -28,6 +28,9 @@ class MyDBHandler(context: Context, name: String?, factory: SQLiteDatabase.Curso
         val COLUMN_RELEASEYEAR = "releaseyear"
         val COLUMN_RANKING = "ranking"
         val COLUMN_TYPE = "type"
+
+        val TABLE_RANKINGHISTORY = "rankinghistory"
+        val COLUMN_SYNCDATE = "syncdate"
     }
 
     override fun onCreate(db: SQLiteDatabase) {
@@ -39,8 +42,13 @@ class MyDBHandler(context: Context, name: String?, factory: SQLiteDatabase.Curso
                 COLUMN_TITLE + " TEXT," + COLUMN_IMAGE + " TEXT," + COLUMN_RELEASEYEAR + " INTEGER," +
                 COLUMN_RANKING + " INTEGER," + COLUMN_TYPE + " TEXT)")
 
+        val CREATE_RANKING_HISTORY_TABLE = ("CREATE TABLE " + TABLE_RANKINGHISTORY + "(" + COLUMN_ID + " INTEGER,"
+                + COLUMN_SYNCDATE + " TEXT," + COLUMN_RANKING + " INTEGER," + "FOREIGN KEY (" + COLUMN_ID + ") REFERENCES " +
+                TABLE_GAMEADDON + " ON DELETE CASCADE)");
+
         db.execSQL(CREATE_GAME_ADDON_TABLE)
         db.execSQL(CREATE_USERNAME_TABLE)
+        db.execSQL(CREATE_RANKING_HISTORY_TABLE)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, p1: Int, p2: Int) {
@@ -54,6 +62,24 @@ class MyDBHandler(context: Context, name: String?, factory: SQLiteDatabase.Curso
         db.execSQL("DELETE FROM $TABLE_USER")
     }
 
+    fun getRankingHistory(id: Long):ArrayList<GameRankingHistory>{
+        val db = this.writableDatabase
+        val query = "SELECT * FROM $TABLE_RANKINGHISTORY WHERE $COLUMN_ID = $id"
+        val cursor = db.rawQuery(query, null)
+
+        val rankingHistoryList: ArrayList<GameRankingHistory> = ArrayList()
+        if (cursor.moveToFirst()){
+            do{
+                val syncDate = cursor.getString(1)
+                val ranking = cursor.getInt(2)
+
+                val gameRanking = GameRankingHistory(id = id, syncDate = syncDate,ranking = ranking)
+                rankingHistoryList.add(gameRanking)
+            } while(cursor.moveToNext())
+        }
+        return rankingHistoryList
+    }
+
     fun addGame(game: GameAddOn){
         val gameId = game.id
         val db = this.writableDatabase
@@ -61,7 +87,7 @@ class MyDBHandler(context: Context, name: String?, factory: SQLiteDatabase.Curso
         val cursor = db.rawQuery(query, null)
         if (cursor.count==0){
             val values = ContentValues()
-            values.put(COLUMN_ID, game.id)
+            values.put(COLUMN_ID, gameId)
             values.put(COLUMN_TITLE, game.title)
             values.put(COLUMN_IMAGE, game.img)
             values.put(COLUMN_RELEASEYEAR, game.releaseYear)
@@ -69,6 +95,12 @@ class MyDBHandler(context: Context, name: String?, factory: SQLiteDatabase.Curso
             values.put(COLUMN_TYPE, game.type)
             db.insert(TABLE_GAMEADDON, null, values)
         }
+        val values_history = ContentValues()
+        values_history.put(COLUMN_ID, gameId)
+        values_history.put(COLUMN_SYNCDATE, LocalDateTime.now().toString())
+        values_history.put(COLUMN_RANKING, game.ranking)
+        db.insert(TABLE_RANKINGHISTORY, null, values_history)
+
         cursor.close()
         db.close()
     }
@@ -76,7 +108,9 @@ class MyDBHandler(context: Context, name: String?, factory: SQLiteDatabase.Curso
     fun addAddOn(addOn: GameAddOn){
         val id = addOn.id
         val query = "SELECT * FROM $TABLE_GAMEADDON WHERE $COLUMN_ID = $id"
+        val queryDeleteHistory = "DELETE FROM $TABLE_RANKINGHISTORY WHERE $COLUMN_ID = $id"
         val db = this.writableDatabase
+        db.execSQL(queryDeleteHistory)
         val cursor = db.rawQuery(query, null)
 
         if (cursor.moveToFirst()){
@@ -119,14 +153,10 @@ class MyDBHandler(context: Context, name: String?, factory: SQLiteDatabase.Curso
         }catch (e: Exception){}
     }
 
-    fun getGames(sort:String?, order:String?):ArrayList<GameAddOn>{
+    fun getGames():ArrayList<GameAddOn>{
         val gamesList: ArrayList<GameAddOn> = ArrayList()
 
         var query = "SELECT * FROM $TABLE_GAMEADDON WHERE $COLUMN_TYPE = \"Game\""
-        if(sort != null){
-            query = "SELECT * FROM $TABLE_GAMEADDON WHERE $COLUMN_TYPE = \"Game\" ORDER BY \"$sort\" $order"
-        }
-
         val db = this.readableDatabase
         var cursor: Cursor? = null
 
@@ -157,13 +187,10 @@ class MyDBHandler(context: Context, name: String?, factory: SQLiteDatabase.Curso
         return gamesList
     }
 
-    fun getAddOns(sort:String?, order:String?):ArrayList<GameAddOn>{
+    fun getAddOns():ArrayList<GameAddOn>{
         val addOnsList: ArrayList<GameAddOn> = ArrayList()
 
         var query = "SELECT * FROM $TABLE_GAMEADDON WHERE $COLUMN_TYPE = \"Expansion\""
-        if(sort != null){
-            query = "SELECT * FROM $TABLE_GAMEADDON WHERE $COLUMN_TYPE = \"Expansion\" ORDER BY \"$sort\" $order"
-        }
 
         val db = this.readableDatabase
         var cursor: Cursor? = null
