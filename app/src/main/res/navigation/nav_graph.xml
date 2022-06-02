@@ -53,7 +53,7 @@
     </fragment>
     <fragment
         android:id="@+id/add_ons"
-        android:name="com.example.bgc.add_ons"
-        android:label="fragment_add_ons"
+        android:name="com.example.bgc.AddOns"
+        android:label="@string/add_ons_list"
         tools:layout="@layout/fragment_add_ons" />
 </navigation>

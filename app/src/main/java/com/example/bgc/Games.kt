@@ -39,9 +39,7 @@ class Games : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         dbHandler = MyDBHandler(requireActivity(), null, null, 1)
         val gameListArray: ArrayList<GameAddOn> = dbHandler.getGames()
-        val sizeGames = gameListArray.size
         adapter.setData(gameListArray)
-        Toast.makeText(activity, "Ilość gier: $sizeGames", Toast.LENGTH_LONG).show()
         super.onViewCreated(view, savedInstanceState)
     }
 

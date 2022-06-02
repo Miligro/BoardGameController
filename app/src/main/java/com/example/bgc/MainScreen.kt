@@ -49,7 +49,7 @@ class MainScreen : Fragment() {
             findNavController().navigate(R.id.action_mainScreen_to_games)
         }
         binding.AddOnsBtn.setOnClickListener {
-            findNavController().navigate(R.id.action_mainScreen_to_configuration)
+            findNavController().navigate(R.id.action_mainScreen_to_add_ons)
         }
         binding.syncBtn.setOnClickListener {
             findNavController().navigate(R.id.action_mainScreen_to_synchronization)
