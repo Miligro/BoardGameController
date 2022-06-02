@@ -15,4 +15,19 @@
     <string name="add_ons_list">Lista dodatków</string>
     <string name="synchronize">Synchronizuj</string>
     <string name="clear_data">Wyczyść dane</string>
+    <string name="title_desc">Tytuł \u2193</string>
+    <string name="release_desc">Rok \u2193</string>
+    <string name="ranking_desc">Ranking \u2193</string>
+    <string name="title_asc">Tytuł \u2191</string>
+    <string name="release_asc">Rok \u2191</string>
+    <string name="ranking_asc">Ranking \u2191</string>
+    <string name="lp">Lp.</string>
+    <string name="title">Tytuł</string>
+    <string name="release">Rok</string>
+    <string name="ranking">Ranking</string>
+    <string name="downloading">Pobieranie</string>
+    <string name="loadingGames">Wczytywanie gier</string>
+    <string name="loadingAddOns">Wczytywanie dodatków</string>
+    <string name="enter_username">Podaj nazwę użytkownika</string>
+    <string name="save">Zapisz</string>
 </resources>

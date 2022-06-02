@@ -119,9 +119,13 @@ class MyDBHandler(context: Context, name: String?, factory: SQLiteDatabase.Curso
         }catch (e: Exception){}
     }
 
-    fun getGames():ArrayList<GameAddOn>{
+    fun getGames(sort:String?, order:String?):ArrayList<GameAddOn>{
         val gamesList: ArrayList<GameAddOn> = ArrayList()
-        val query = "SELECT * FROM $TABLE_GAMEADDON WHERE $COLUMN_TYPE = \"Game\""
+
+        var query = "SELECT * FROM $TABLE_GAMEADDON WHERE $COLUMN_TYPE = \"Game\""
+        if(sort != null){
+            query = "SELECT * FROM $TABLE_GAMEADDON WHERE $COLUMN_TYPE = \"Game\" ORDER BY \"$sort\" $order"
+        }
 
         val db = this.readableDatabase
         var cursor: Cursor? = null
@@ -153,9 +157,13 @@ class MyDBHandler(context: Context, name: String?, factory: SQLiteDatabase.Curso
         return gamesList
     }
 
-    fun getAddOns():ArrayList<GameAddOn>{
+    fun getAddOns(sort:String?, order:String?):ArrayList<GameAddOn>{
         val addOnsList: ArrayList<GameAddOn> = ArrayList()
-        val query = "SELECT * FROM $TABLE_GAMEADDON WHERE $COLUMN_TYPE = \"Expansion\""
+
+        var query = "SELECT * FROM $TABLE_GAMEADDON WHERE $COLUMN_TYPE = \"Expansion\""
+        if(sort != null){
+            query = "SELECT * FROM $TABLE_GAMEADDON WHERE $COLUMN_TYPE = \"Expansion\" ORDER BY \"$sort\" $order"
+        }
 
         val db = this.readableDatabase
         var cursor: Cursor? = null

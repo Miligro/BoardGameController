@@ -172,6 +172,20 @@
             android:gravity="center">
 
             <Button
+                android:id="@+id/AddOnsBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/add_ons_list"
+                android:textSize="16sp" />
+
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center">
+
+            <Button
                 android:id="@+id/clearDataBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -190,20 +204,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/synchronize"
-                android:textSize="16sp" />
-
-        </TableRow>
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center">
-
-            <Button
-                android:id="@+id/AddOnsBtn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/add_ons_list"
                 android:textSize="16sp" />
 
         </TableRow>

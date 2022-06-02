@@ -4,16 +4,14 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.AsyncTask
 import android.view.View
+import android.widget.LinearLayout
 import android.widget.ProgressBar
 import androidx.navigation.NavController
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.Node
 import org.w3c.dom.NodeList
-import java.io.File
-import java.io.FileNotFoundException
-import java.io.FileOutputStream
-import java.io.IOException
+import java.io.*
 import java.net.MalformedURLException
 import java.net.URL
 import javax.xml.parsers.DocumentBuilderFactory
@@ -21,17 +19,19 @@ import javax.xml.parsers.DocumentBuilderFactory
 @SuppressLint("StaticFieldLeak")
 @Suppress("DEPRECATION")
 class UserStartDownloader(
-    var progressBar: ProgressBar,
+    var layouts: ArrayList<LinearLayout>,
+    var progressBars: ArrayList<ProgressBar>,
     var context: Context?,
-    var username: String,
-    var findNavController: NavController
+    var username: String?,
+    var findNavController: NavController,
+    private val from: String
 ): AsyncTask<String, Int, String>(){
 
     private var dbHandler: MyDBHandler = MyDBHandler(context!!, null, null, 1)
 
     override fun onPreExecute() {
         super.onPreExecute()
-        progressBar.visibility = View.VISIBLE
+        layouts[0].visibility = View.VISIBLE
     }
 
     override fun onPostExecute(result: String?) {
@@ -44,12 +44,16 @@ class UserStartDownloader(
         if (user != null) {
             dbHandler.syncUser(user)
         }
-        findNavController.navigate(R.id.action_configuration_to_mainScreen)
+        if(from == "configuration"){
+            findNavController.navigate(R.id.action_configuration_to_mainScreen)
+        }else if(from == "synchronization"){
+            findNavController.navigate(R.id.action_synchronization_to_mainScreen)
+        }
     }
 
     override fun onProgressUpdate(vararg values: Int?) {
         super.onProgressUpdate(*values)
-        progressBar.progress = values[0]!!
+        progressBars[0].progress = values[0]!!
     }
 
     override fun doInBackground(vararg p0: String?): String {
@@ -80,7 +84,7 @@ class UserStartDownloader(
             count = isStreamGames.read(data)
             while(count != -1){
                 total += count
-                progress = total*100 / 3851857
+                progress = total*100 / 5851857
                 publishProgress(progress)
                 fosGames.write(data, 0, count)
                 count = isStreamGames.read(data)
@@ -91,7 +95,7 @@ class UserStartDownloader(
             count = isStreamAddOns.read(data)
             while(count != -1){
                 total += count
-                progress = total*100 / 3851857
+                progress = total*100 / 5851857
                 publishProgress(progress)
                 fosAddOns.write(data, 0, count)
                 count = isStreamAddOns.read(data)
@@ -110,6 +114,7 @@ class UserStartDownloader(
     }
 
     fun loadDataGame(){
+        layouts[1].visibility = View.VISIBLE
         val filename = "games.xml"
         val path = context?.filesDir
         val inDir = File(path, "XML")
@@ -127,7 +132,7 @@ class UserStartDownloader(
                     if(itemNode.nodeType == Node.ELEMENT_NODE) {
                         val elem = itemNode as Element
                         val children = elem.childNodes
-//                        binding.progressBar.progress = (i+1)*100/items.length
+                        progressBars[1].progress = (i+1)*100/items.length
                         var currentId:Long? = null
                         var currentTitle:String? = null
                         var currentImg:String? = null
@@ -197,6 +202,7 @@ class UserStartDownloader(
     }
 
     fun loadDataAddOn(){
+        layouts[2].visibility = View.VISIBLE
         val filename = "addons.xml"
         val path = context?.filesDir
         val inDir = File(path, "XML")
@@ -214,7 +220,7 @@ class UserStartDownloader(
                     if(itemNode.nodeType == Node.ELEMENT_NODE) {
                         val elem = itemNode as Element
                         val children = elem.childNodes
-//                        binding.progressBar.progress = (i+1)*100/items.length
+                        progressBars[2].progress = (i+1)*100/items.length
                         var currentId:Long? = null
                         var currentTitle:String? = null
                         var currentImg:String? = null

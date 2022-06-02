@@ -14,6 +14,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.bgc.databinding.FragmentMainScreenBinding
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import kotlin.system.exitProcess
 
 
@@ -68,7 +70,9 @@ class MainScreen : Fragment() {
         binding.usernameTextView.text = user?.username
         binding.numOfGamesTextView.text = user?.numberOfGames.toString()
         binding.numOfAddOnsTextView.text = user?.numberOfAddOns.toString()
-        binding.lastSyncTextView.text = user?.lastSync
+        val syncDate = LocalDateTime.parse(user?.lastSync)
+        val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        binding.lastSyncTextView.text = syncDate.format(formatter)
     }
 
     private fun clearDataBase(){

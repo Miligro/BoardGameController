@@ -27,7 +27,11 @@
         android:id="@+id/synchronization"
         android:name="com.example.bgc.Synchronization"
         android:label="@string/synchronization_fragment"
-        tools:layout="@layout/fragment_synchronization" />
+        tools:layout="@layout/fragment_synchronization" >
+        <action
+            android:id="@+id/action_synchronization_to_mainScreen"
+            app:destination="@id/mainScreen" />
+    </fragment>
     <fragment
         android:id="@+id/games"
         android:name="com.example.bgc.Games"

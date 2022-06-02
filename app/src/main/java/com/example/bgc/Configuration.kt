@@ -6,6 +6,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.findNavController
 import com.example.bgc.databinding.FragmentConfigurationBinding
@@ -25,18 +27,16 @@ class Configuration : Fragment() {
 
         _binding = FragmentConfigurationBinding.inflate(inflater, container, false)
         return binding.root
-
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         dbHandler = MyDBHandler(requireActivity(), null, null, 1)
         dbHandler.deleteAllGamesAddOns()
-        binding.progressBar.progress = 0
         binding.saveUserBtn.setOnClickListener{
             binding.saveUserBtn.isEnabled = false
             username = binding.usernameText.text.toString()
-            val user: User = User(username, 0, 0, "123")
+            val user: User = User(username, 0, 0, "")
             dbHandler.addUser(user)
             downloadData()
         }
@@ -48,7 +48,16 @@ class Configuration : Fragment() {
     }
 
     fun downloadData() {
-        val cd = UserStartDownloader(binding.progressBar, requireContext(), username, findNavController())
+        val layouts = ArrayList<LinearLayout>()
+        val progressBars = ArrayList<ProgressBar>()
+        layouts.add(binding.downloadLayout)
+        layouts.add(binding.loadGamesLayout)
+        layouts.add(binding.loadAddOnsLayout)
+
+        progressBars.add(binding.downloadProgress)
+        progressBars.add(binding.laodGamesProgress)
+        progressBars.add(binding.laodAddOnsProgress)
+        val cd = UserStartDownloader(layouts, progressBars, requireContext(), username, findNavController(), "configuration")
         cd.execute()
     }
 }
