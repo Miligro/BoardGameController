@@ -28,6 +28,7 @@ class MyDBHandler(context: Context, name: String?, factory: SQLiteDatabase.Curso
         val COLUMN_RELEASEYEAR = "releaseyear"
         val COLUMN_RANKING = "ranking"
         val COLUMN_TYPE = "type"
+        val COLUMN_TOREMOVE = "toremove"
 
         val TABLE_RANKINGHISTORY = "rankinghistory"
         val COLUMN_SYNCDATE = "syncdate"
@@ -40,7 +41,7 @@ class MyDBHandler(context: Context, name: String?, factory: SQLiteDatabase.Curso
 
         val CREATE_GAME_ADDON_TABLE = ("CREATE TABLE " + TABLE_GAMEADDON + "(" + COLUMN_ID + " INTEGER PRIMARY KEY," +
                 COLUMN_TITLE + " TEXT," + COLUMN_IMAGE + " TEXT," + COLUMN_RELEASEYEAR + " INTEGER," +
-                COLUMN_RANKING + " INTEGER," + COLUMN_TYPE + " TEXT)")
+                COLUMN_RANKING + " INTEGER," + COLUMN_TYPE + " TEXT," + COLUMN_TOREMOVE + " INTEGER)")
 
         val CREATE_RANKING_HISTORY_TABLE = ("CREATE TABLE " + TABLE_RANKINGHISTORY + "(" + COLUMN_ID + " INTEGER,"
                 + COLUMN_SYNCDATE + " TEXT," + COLUMN_RANKING + " INTEGER," + "FOREIGN KEY (" + COLUMN_ID + ") REFERENCES " +
@@ -60,6 +61,18 @@ class MyDBHandler(context: Context, name: String?, factory: SQLiteDatabase.Curso
     fun deleteAllUsers(){
         val db = this.writableDatabase
         db.execSQL("DELETE FROM $TABLE_USER")
+    }
+
+    fun setToRemove(remove: Int){
+        val db = this.writableDatabase
+        val query = "UPDATE $TABLE_GAMEADDON SET $COLUMN_TOREMOVE = $remove"
+        db.execSQL(query)
+    }
+
+    fun removeOldGames(){
+        val db = this.writableDatabase
+        val query = "DELETE FROM $TABLE_GAMEADDON WHERE $COLUMN_TOREMOVE = 1"
+        db.execSQL(query)
     }
 
     fun getRankingHistory(id: Long):ArrayList<GameRankingHistory>{
@@ -93,7 +106,18 @@ class MyDBHandler(context: Context, name: String?, factory: SQLiteDatabase.Curso
             values.put(COLUMN_RELEASEYEAR, game.releaseYear)
             values.put(COLUMN_RANKING, game.ranking)
             values.put(COLUMN_TYPE, game.type)
+            values.put(COLUMN_TOREMOVE, 0)
             db.insert(TABLE_GAMEADDON, null, values)
+        }else{
+            val values = ContentValues()
+            values.put(COLUMN_ID, gameId)
+            values.put(COLUMN_TITLE, game.title)
+            values.put(COLUMN_IMAGE, game.img)
+            values.put(COLUMN_RELEASEYEAR, game.releaseYear)
+            values.put(COLUMN_RANKING, game.ranking)
+            values.put(COLUMN_TYPE, game.type)
+            values.put(COLUMN_TOREMOVE, 0)
+            db.update(TABLE_GAMEADDON, values, "_id = $gameId", null);
         }
         val values_history = ContentValues()
         values_history.put(COLUMN_ID, gameId)
@@ -120,6 +144,7 @@ class MyDBHandler(context: Context, name: String?, factory: SQLiteDatabase.Curso
             values.put(COLUMN_IMAGE, addOn.img)
             values.put(COLUMN_RELEASEYEAR, addOn.releaseYear)
             values.put(COLUMN_TYPE, "Expansion")
+            values.put(COLUMN_TOREMOVE, 0)
             db.update(TABLE_GAMEADDON, values, "_id = $id", null);
         } else{
             val values = ContentValues()
@@ -128,6 +153,7 @@ class MyDBHandler(context: Context, name: String?, factory: SQLiteDatabase.Curso
             values.put(COLUMN_IMAGE, addOn.img)
             values.put(COLUMN_RELEASEYEAR, addOn.releaseYear)
             values.put(COLUMN_TYPE, "Expansion")
+            values.put(COLUMN_TOREMOVE, 0)
             db.insert(TABLE_GAMEADDON, null, values)
         }
 
@@ -148,9 +174,12 @@ class MyDBHandler(context: Context, name: String?, factory: SQLiteDatabase.Curso
 
     fun deleteAllGamesAddOns(){
         val db = this.writableDatabase
-        try{
-            db.execSQL("DELETE FROM $TABLE_GAMEADDON")
-        }catch (e: Exception){}
+        db.execSQL("DELETE FROM $TABLE_GAMEADDON")
+    }
+
+    fun deleteAllHistory(){
+        val db = this.writableDatabase
+        db.execSQL("DELETE FROM $TABLE_RANKINGHISTORY")
     }
 
     fun getGames():ArrayList<GameAddOn>{

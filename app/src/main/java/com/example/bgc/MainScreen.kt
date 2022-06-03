@@ -84,6 +84,7 @@ class MainScreen : Fragment() {
             DialogInterface.OnClickListener { dialog, which ->
                 dbHandler.deleteAllUsers()
                 dbHandler.deleteAllGamesAddOns()
+                dbHandler.deleteAllHistory()
                 activity?.finish()
                 exitProcess(0)
             })

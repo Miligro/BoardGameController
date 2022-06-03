@@ -2,12 +2,14 @@ package com.example.bgc
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.DialogInterface
 import android.os.AsyncTask
 import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
 import org.w3c.dom.Document
@@ -51,10 +53,11 @@ class UserStartDownloader(
             if (user != null) {
                 dbHandler.syncUser(user)
             }
+            if(from == "synchronization") {
+                confirmRemove()
+            }
             if (from == "configuration") {
                 findNavController.navigate(R.id.action_configuration_to_mainScreen)
-            } else if (from == "synchronization") {
-                findNavController.navigate(R.id.action_synchronization_to_mainScreen)
             }
         }else{
             if(from == "configuration"){
@@ -135,6 +138,24 @@ class UserStartDownloader(
         return "success"
     }
 
+    private fun confirmRemove(){
+        val builder: AlertDialog.Builder = AlertDialog.Builder(context!!)
+        builder.setCancelable(true)
+        builder.setTitle("Potwierdzenie")
+        builder.setMessage("Czy chcesz usunąć gry, które zniknęły z listy")
+        builder.setPositiveButton("Zatwierdz",
+            DialogInterface.OnClickListener { dialog, which ->
+                dbHandler.removeOldGames()
+                findNavController.navigate(R.id.action_synchronization_to_mainScreen)
+            })
+        builder.setNegativeButton("Anuluj",DialogInterface.OnClickListener { dialog, which ->
+            findNavController.navigate(R.id.action_synchronization_to_mainScreen)
+        })
+
+        val dialog: AlertDialog = builder.create()
+        dialog.show()
+    }
+
     fun checkFile():String{
         var filename = "games.xml"
         val path = context?.filesDir
@@ -207,6 +228,9 @@ class UserStartDownloader(
     }
 
     fun loadDataGame(){
+        if(from == "synchronization"){
+            dbHandler.setToRemove(1)
+        }
         val filename = "games.xml"
         val path = context?.filesDir
         val inDir = File(path, "XML")
