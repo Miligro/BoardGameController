@@ -4,8 +4,11 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.AsyncTask
 import android.view.View
+import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ProgressBar
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
 import org.w3c.dom.Document
 import org.w3c.dom.Element
@@ -19,12 +22,15 @@ import javax.xml.parsers.DocumentBuilderFactory
 @SuppressLint("StaticFieldLeak")
 @Suppress("DEPRECATION")
 class UserStartDownloader(
+
+    val activityApp: AppCompatActivity?,
+    val button: Button,
     var layouts: ArrayList<LinearLayout>,
     var progressBars: ArrayList<ProgressBar>,
     var context: Context?,
     var username: String?,
     var findNavController: NavController,
-    private val from: String
+    private val from: String,
 ): AsyncTask<String, Int, String>(){
 
     private var dbHandler: MyDBHandler = MyDBHandler(context!!, null, null, 1)
@@ -32,28 +38,37 @@ class UserStartDownloader(
     override fun onPreExecute() {
         super.onPreExecute()
         layouts[0].visibility = View.VISIBLE
+        layouts[1].visibility = View.VISIBLE
+        layouts[2].visibility = View.VISIBLE
     }
 
     override fun onPostExecute(result: String?) {
         super.onPostExecute(result)
-        loadDataGame()
-        loadDataAddOn()
-        val user: User? = dbHandler.findUser()
-        user?.numberOfAddOns = dbHandler.getNumAddOns()
-        user?.numberOfGames = dbHandler.getNumGames()
-        if (user != null) {
-            dbHandler.syncUser(user)
-        }
-        if(from == "configuration"){
-            findNavController.navigate(R.id.action_configuration_to_mainScreen)
-        }else if(from == "synchronization"){
-            findNavController.navigate(R.id.action_synchronization_to_mainScreen)
+        if(result == "success") {
+            val user: User? = dbHandler.findUser()
+            user?.numberOfAddOns = dbHandler.getNumAddOns()
+            user?.numberOfGames = dbHandler.getNumGames()
+            if (user != null) {
+                dbHandler.syncUser(user)
+            }
+            if (from == "configuration") {
+                findNavController.navigate(R.id.action_configuration_to_mainScreen)
+            } else if (from == "synchronization") {
+                findNavController.navigate(R.id.action_synchronization_to_mainScreen)
+            }
+        }else{
+            if(from == "configuration"){
+                dbHandler.deleteAllUsers()
+            }
+            button.isEnabled = true
+            activityApp?.supportActionBar?.setDisplayHomeAsUpEnabled(true)
+            Toast.makeText(context, "$result", Toast.LENGTH_LONG).show()
         }
     }
 
     override fun onProgressUpdate(vararg values: Int?) {
         super.onProgressUpdate(*values)
-        progressBars[0].progress = values[0]!!
+        progressBars[values[1]!!].progress = values[0]!!
     }
 
     override fun doInBackground(vararg p0: String?): String {
@@ -85,7 +100,7 @@ class UserStartDownloader(
             while(count != -1){
                 total += count
                 progress = total*100 / 5851857
-                publishProgress(progress)
+                publishProgress(progress, 0)
                 fosGames.write(data, 0, count)
                 count = isStreamGames.read(data)
             }
@@ -96,25 +111,102 @@ class UserStartDownloader(
             while(count != -1){
                 total += count
                 progress = total*100 / 5851857
-                publishProgress(progress)
+                publishProgress(progress, 0)
                 fosAddOns.write(data, 0, count)
                 count = isStreamAddOns.read(data)
             }
             isStreamAddOns.close()
             fosAddOns.close()
-
+            val check = checkFile()
+            if(check!="Ok"){
+                throw Exception(check)
+            }
+            loadDataGame()
+            loadDataAddOn()
         }catch(e: MalformedURLException){
             return "Zły URL"
         } catch (e: FileNotFoundException){
             return "Brak pliku"
         } catch (e: IOException) {
             return "Wyjątek IO"
+        } catch (e: Exception){
+            return e.message.toString()
         }
         return "success"
     }
 
+    fun checkFile():String{
+        var filename = "games.xml"
+        val path = context?.filesDir
+        var inDir = File(path, "XML")
+
+        if (inDir.exists()) {
+            val file = File(inDir, filename)
+            if (file.exists()) {
+                val xmlDoc: Document =
+                    DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file)
+
+                xmlDoc.documentElement.normalize()
+                val elems: NodeList? = xmlDoc.getElementsByTagName("errors")
+                if (elems != null) {
+                    for (i in 0 until elems.length){
+                        val itemNode: Node = elems.item(i)
+                        if(itemNode.nodeName == "errors"){
+                            val elemsV2: NodeList = itemNode.childNodes
+                            for (j in 0 until elemsV2.length){
+                                val itemNodeV2: Node = elemsV2.item(j)
+                                if(itemNodeV2.nodeName == "error"){
+                                    val elemsV3: NodeList = itemNodeV2.childNodes
+                                    for (k in 0 until elemsV2.length){
+                                        val itemNodeV3: Node = elemsV3.item(k)
+                                        if(itemNodeV3.nodeName == "message"){
+                                            return itemNodeV3.textContent
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        filename = "addons.xml"
+        inDir = File(path, "XML")
+        if (inDir.exists()) {
+            val file = File(inDir, filename)
+            if (file.exists()) {
+                val xmlDoc: Document =
+                    DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file)
+
+                xmlDoc.documentElement.normalize()
+                val elems: NodeList? = xmlDoc.getElementsByTagName("errors")
+                if (elems != null) {
+                    for (i in 0 until elems.length){
+                        val itemNode: Node = elems.item(i)
+                        if(itemNode.nodeName == "errors"){
+                            val elemsV2: NodeList = itemNode.childNodes
+                            for (j in 0 until elemsV2.length){
+                                val itemNodeV2: Node = elemsV2.item(j)
+                                if(itemNodeV2.nodeName == "error"){
+                                    val elemsV3: NodeList = itemNodeV2.childNodes
+                                    for (k in 0 until elemsV2.length){
+                                        val itemNodeV3: Node = elemsV3.item(k)
+                                        if(itemNodeV3.nodeName == "message"){
+                                            return itemNodeV3.textContent
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return "Ok"
+    }
+
     fun loadDataGame(){
-        layouts[1].visibility = View.VISIBLE
         val filename = "games.xml"
         val path = context?.filesDir
         val inDir = File(path, "XML")
@@ -132,7 +224,7 @@ class UserStartDownloader(
                     if(itemNode.nodeType == Node.ELEMENT_NODE) {
                         val elem = itemNode as Element
                         val children = elem.childNodes
-                        progressBars[1].progress = (i+1)*100/items.length
+                        publishProgress((i+1)*100/items.length, 1)
                         var currentId:Long? = null
                         var currentTitle:String? = null
                         var currentImg:String? = null
@@ -202,7 +294,6 @@ class UserStartDownloader(
     }
 
     fun loadDataAddOn(){
-        layouts[2].visibility = View.VISIBLE
         val filename = "addons.xml"
         val path = context?.filesDir
         val inDir = File(path, "XML")
@@ -220,7 +311,7 @@ class UserStartDownloader(
                     if(itemNode.nodeType == Node.ELEMENT_NODE) {
                         val elem = itemNode as Element
                         val children = elem.childNodes
-                        progressBars[2].progress = (i+1)*100/items.length
+                        publishProgress((i+1)*100/items.length, 2)
                         var currentId:Long? = null
                         var currentTitle:String? = null
                         var currentImg:String? = null

@@ -83,6 +83,7 @@ class MainScreen : Fragment() {
         builder.setPositiveButton("Zatwierdz",
             DialogInterface.OnClickListener { dialog, which ->
                 dbHandler.deleteAllUsers()
+                dbHandler.deleteAllGamesAddOns()
                 activity?.finish()
                 exitProcess(0)
             })

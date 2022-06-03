@@ -8,11 +8,14 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ProgressBar
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.example.bgc.databinding.FragmentConfigurationBinding
 
-class Configuration : Fragment() {
+class Configuration : Fragment(), LifecycleOwner {
     private var _binding: FragmentConfigurationBinding? = null
     private lateinit var dbHandler: MyDBHandler
 
@@ -57,7 +60,7 @@ class Configuration : Fragment() {
         progressBars.add(binding.downloadProgress)
         progressBars.add(binding.laodGamesProgress)
         progressBars.add(binding.laodAddOnsProgress)
-        val cd = UserStartDownloader(layouts, progressBars, requireContext(), username, findNavController(), "configuration")
+        val cd = UserStartDownloader(activity as? AppCompatActivity,binding.saveUserBtn, layouts, progressBars, requireContext(), username, findNavController(), "configuration")
         cd.execute()
     }
 }
