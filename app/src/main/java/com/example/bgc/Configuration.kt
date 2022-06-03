@@ -32,11 +32,11 @@ class Configuration : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         dbHandler = MyDBHandler(requireActivity(), null, null, 1)
-//        dbHandler.deleteAllGamesAddOns()
         binding.saveUserBtn.setOnClickListener{
             binding.saveUserBtn.isEnabled = false
+            (activity as? AppCompatActivity)?.supportActionBar?.setDisplayHomeAsUpEnabled(false)
             username = binding.usernameText.text.toString()
-            val user: User = User(username, 0, 0, "")
+            val user = User(username, 0, 0, "")
             dbHandler.addUser(user)
             downloadData()
         }

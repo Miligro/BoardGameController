@@ -45,7 +45,11 @@
         android:id="@+id/history"
         android:name="com.example.bgc.History"
         android:label="@string/history_fragment"
-        tools:layout="@layout/fragment_history" />
+        tools:layout="@layout/fragment_history" >
+        <argument
+            android:name="gameId"
+            app:argType="long" />
+    </fragment>
     <fragment
         android:id="@+id/configuration"
         android:name="com.example.bgc.Configuration"

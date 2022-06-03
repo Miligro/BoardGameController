@@ -37,7 +37,8 @@ class GamesListAdapter(navController: NavController): RecyclerView.Adapter<Games
         holder.rankingText.text = currentItem.ranking.toString()
         Picasso.get().load(currentItem.img).into(holder.imageView);
         holder.rowLayout.setOnClickListener{
-            navCon.navigate(R.id.action_games_to_history)
+            val action = GamesDirections.actionGamesToHistory(currentItem.id)
+            navCon.navigate(action)
         }
     }
 
