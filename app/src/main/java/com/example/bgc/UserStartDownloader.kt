@@ -5,10 +5,7 @@ import android.content.Context
 import android.content.DialogInterface
 import android.os.AsyncTask
 import android.view.View
-import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.ProgressBar
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
@@ -17,14 +14,16 @@ import org.w3c.dom.Element
 import org.w3c.dom.Node
 import org.w3c.dom.NodeList
 import java.io.*
+import java.net.HttpURLConnection
 import java.net.MalformedURLException
 import java.net.URL
+import java.net.URLConnection
 import javax.xml.parsers.DocumentBuilderFactory
 
 @SuppressLint("StaticFieldLeak")
 @Suppress("DEPRECATION")
 class UserStartDownloader(
-
+    val downloadProgressText: TextView,
     val activityApp: AppCompatActivity?,
     val button: Button,
     var layouts: ArrayList<LinearLayout>,
@@ -60,6 +59,9 @@ class UserStartDownloader(
                 findNavController.navigate(R.id.action_configuration_to_mainScreen)
             }
         }else{
+            layouts[0].visibility = View.INVISIBLE
+            layouts[1].visibility = View.INVISIBLE
+            layouts[2].visibility = View.INVISIBLE
             if(from == "configuration"){
                 dbHandler.deleteAllUsers()
             }
@@ -71,7 +73,11 @@ class UserStartDownloader(
 
     override fun onProgressUpdate(vararg values: Int?) {
         super.onProgressUpdate(*values)
-        progressBars[values[1]!!].progress = values[0]!!
+        if(values[1]!! == 2){
+            downloadProgressText.text = values[0]!!.toString() + " Bajtów"
+        }else {
+            progressBars[values[1]!!].progress = values[0]!!
+        }
     }
 
     override fun doInBackground(vararg p0: String?): String {
@@ -85,8 +91,6 @@ class UserStartDownloader(
             val connectionAddOns = urlAddOns.openConnection()
             connectionAddOns.connect()
             val isStreamAddOns = urlAddOns.openStream()
-
-//                val lengthOfFile = connectionGames.contentLengthLong
             val path = context?.filesDir
             val testDirectory = File("$path/XML")
             if (!testDirectory.exists()) testDirectory.mkdir()
@@ -97,13 +101,11 @@ class UserStartDownloader(
             val data = ByteArray(1024)
             var count = 0
             var total:Int = 0
-            var progress= 0
 
             count = isStreamGames.read(data)
             while(count != -1){
                 total += count
-                progress = total*100 / 5851857
-                publishProgress(progress, 0)
+                publishProgress(total, 2)
                 fosGames.write(data, 0, count)
                 count = isStreamGames.read(data)
             }
@@ -113,8 +115,7 @@ class UserStartDownloader(
             count = isStreamAddOns.read(data)
             while(count != -1){
                 total += count
-                progress = total*100 / 5851857
-                publishProgress(progress, 0)
+                publishProgress(total, 2)
                 fosAddOns.write(data, 0, count)
                 count = isStreamAddOns.read(data)
             }
@@ -168,25 +169,30 @@ class UserStartDownloader(
                     DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file)
 
                 xmlDoc.documentElement.normalize()
-                val elems: NodeList? = xmlDoc.getElementsByTagName("errors")
-                if (elems != null) {
-                    for (i in 0 until elems.length){
-                        val itemNode: Node = elems.item(i)
-                        if(itemNode.nodeName == "errors"){
-                            val elemsV2: NodeList = itemNode.childNodes
-                            for (j in 0 until elemsV2.length){
-                                val itemNodeV2: Node = elemsV2.item(j)
-                                if(itemNodeV2.nodeName == "error"){
-                                    val elemsV3: NodeList = itemNodeV2.childNodes
-                                    for (k in 0 until elemsV2.length){
-                                        val itemNodeV3: Node = elemsV3.item(k)
-                                        if(itemNodeV3.nodeName == "message"){
-                                            return itemNodeV3.textContent
-                                        }
+                var elems: NodeList = xmlDoc.getElementsByTagName("errors")
+                for (i in 0 until elems.length){
+                    val itemNode: Node = elems.item(i)
+                    if(itemNode.nodeName == "errors"){
+                        val elemsV2: NodeList = itemNode.childNodes
+                        for (j in 0 until elemsV2.length){
+                            val itemNodeV2: Node = elemsV2.item(j)
+                            if(itemNodeV2.nodeName == "error"){
+                                val elemsV3: NodeList = itemNodeV2.childNodes
+                                for (k in 0 until elemsV2.length){
+                                    val itemNodeV3: Node = elemsV3.item(k)
+                                    if(itemNodeV3.nodeName == "message"){
+                                        return itemNodeV3.textContent
                                     }
                                 }
                             }
                         }
+                    }
+                }
+                elems = xmlDoc.getElementsByTagName("message")
+                for (i in 0 until elems.length){
+                    val itemNode: Node = elems.item(i)
+                    if(itemNode.nodeName == "message"){
+                        return itemNode.textContent
                     }
                 }
             }
@@ -201,25 +207,30 @@ class UserStartDownloader(
                     DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file)
 
                 xmlDoc.documentElement.normalize()
-                val elems: NodeList? = xmlDoc.getElementsByTagName("errors")
-                if (elems != null) {
-                    for (i in 0 until elems.length){
-                        val itemNode: Node = elems.item(i)
-                        if(itemNode.nodeName == "errors"){
-                            val elemsV2: NodeList = itemNode.childNodes
-                            for (j in 0 until elemsV2.length){
-                                val itemNodeV2: Node = elemsV2.item(j)
-                                if(itemNodeV2.nodeName == "error"){
-                                    val elemsV3: NodeList = itemNodeV2.childNodes
-                                    for (k in 0 until elemsV2.length){
-                                        val itemNodeV3: Node = elemsV3.item(k)
-                                        if(itemNodeV3.nodeName == "message"){
-                                            return itemNodeV3.textContent
-                                        }
+                var elems: NodeList = xmlDoc.getElementsByTagName("errors")
+                for (i in 0 until elems.length){
+                    val itemNode: Node = elems.item(i)
+                    if(itemNode.nodeName == "errors"){
+                        val elemsV2: NodeList = itemNode.childNodes
+                        for (j in 0 until elemsV2.length){
+                            val itemNodeV2: Node = elemsV2.item(j)
+                            if(itemNodeV2.nodeName == "error"){
+                                val elemsV3: NodeList = itemNodeV2.childNodes
+                                for (k in 0 until elemsV2.length){
+                                    val itemNodeV3: Node = elemsV3.item(k)
+                                    if(itemNodeV3.nodeName == "message"){
+                                        return itemNodeV3.textContent
                                     }
                                 }
                             }
                         }
+                    }
+                }
+                elems = xmlDoc.getElementsByTagName("message")
+                for (i in 0 until elems.length){
+                    val itemNode: Node = elems.item(i)
+                    if(itemNode.nodeName == "message"){
+                        return itemNode.textContent
                     }
                 }
             }
@@ -248,7 +259,7 @@ class UserStartDownloader(
                     if(itemNode.nodeType == Node.ELEMENT_NODE) {
                         val elem = itemNode as Element
                         val children = elem.childNodes
-                        publishProgress((i+1)*100/items.length, 1)
+                        publishProgress((i+1)*100/items.length, 0)
                         var currentId:Long? = null
                         var currentTitle:String? = null
                         var currentImg:String? = null
@@ -335,7 +346,7 @@ class UserStartDownloader(
                     if(itemNode.nodeType == Node.ELEMENT_NODE) {
                         val elem = itemNode as Element
                         val children = elem.childNodes
-                        publishProgress((i+1)*100/items.length, 2)
+                        publishProgress((i+1)*100/items.length, 1)
                         var currentId:Long? = null
                         var currentTitle:String? = null
                         var currentImg:String? = null

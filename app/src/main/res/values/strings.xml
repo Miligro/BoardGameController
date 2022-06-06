@@ -25,7 +25,7 @@
     <string name="title">Tytuł</string>
     <string name="release">Rok</string>
     <string name="ranking">Ranking</string>
-    <string name="downloading">Pobieranie</string>
+    <string name="downloading">Pobrano: </string>
     <string name="loadingGames">Wczytywanie gier</string>
     <string name="loadingAddOns">Wczytywanie dodatków</string>
     <string name="enter_username">Podaj nazwę użytkownika</string>

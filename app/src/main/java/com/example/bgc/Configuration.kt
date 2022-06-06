@@ -57,10 +57,9 @@ class Configuration : Fragment(), LifecycleOwner {
         layouts.add(binding.loadGamesLayout)
         layouts.add(binding.loadAddOnsLayout)
 
-        progressBars.add(binding.downloadProgress)
         progressBars.add(binding.laodGamesProgress)
         progressBars.add(binding.laodAddOnsProgress)
-        val cd = UserStartDownloader(activity as? AppCompatActivity,binding.saveUserBtn, layouts, progressBars, requireContext(), username, findNavController(), "configuration")
+        val cd = UserStartDownloader(binding.downloadProgressText, activity as? AppCompatActivity,binding.saveUserBtn, layouts, progressBars, requireContext(), username, findNavController(), "configuration")
         cd.execute()
     }
 }

@@ -82,12 +82,11 @@ class Synchronization : Fragment() {
         layouts.add(binding.loadGamesLayout)
         layouts.add(binding.loadAddOnsLayout)
 
-        progressBars.add(binding.downloadProgress)
         progressBars.add(binding.laodGamesProgress)
         progressBars.add(binding.laodAddOnsProgress)
         (activity as? AppCompatActivity)?.supportActionBar?.setDisplayHomeAsUpEnabled(false)
         binding.synchronizeBtn.isEnabled = false
-        val cd = UserStartDownloader(activity as? AppCompatActivity,binding.synchronizeBtn, layouts, progressBars, requireContext(), user?.username, findNavController(), "synchronization")
+        val cd = UserStartDownloader(binding.downloadProgressText, activity as? AppCompatActivity,binding.synchronizeBtn, layouts, progressBars, requireContext(), user?.username, findNavController(), "synchronization")
         cd.execute()
     }
 }
